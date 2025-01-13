@@ -3,23 +3,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Numery linii s¹ zapamiêtane w kolejnoœci rosn¹cej w liœcie prostej( ListItem )
+//Numery linii sÄ… zapamiÄ™tane w kolejnoÅ›ci rosnÄ…cej w liÅ›cie prostej( ListItem )
 typedef struct ListItem //do przechowywania numerow linii w ktorych wystepuje slowo
 {
   int storeline; //przechowuje linie
   ListItem* pNext; //nastepny element listy
 } ListItem;
 
-//z podwójn¹ g³ow¹( nowy typ strukturalny - ListHead dla g³owy listy - pFirst, pLast )
-typedef struct ListHead //koniec i poczatek listy zeby mozna bylo operowac z dwoch stron (tak rozumiem zamys³ listy z dwiema g³owami?)
+//z podwÃ³jnÄ… gÅ‚owÄ…( nowy typ strukturalny - ListHead dla gÅ‚owy listy - pFirst, pLast )
+typedef struct ListHead //koniec i poczatek listy zeby mozna bylo operowac z dwoch stron (tak rozumiem zamysÅ‚ listy z dwiema gÅ‚owami?)
 {
   ListItem* pFirst; //pierwszy element listy
   ListItem* pLast; //ostatni element listy
 } ListHead;
 
-/*Zdefiniowaæ strukturê danych dla elementu drzewa BST(TreeItem), w ktorym
-jest przechowywane s³owo, iloœæ wyst¹pieñ oraz numery linii( nie powtarzajace sie ).
-S³owo jest tablic¹  dynamiczn¹( pWord )*/
+/*ZdefiniowaÄ‡ strukturÄ™ danych dla elementu drzewa BST(TreeItem), w ktorym
+jest przechowywane sÅ‚owo, iloÅ›Ä‡ wystÄ…pieÅ„ oraz numery linii( nie powtarzajace sie ).
+SÅ‚owo jest tablicÄ…  dynamicznÄ…( pWord )*/
 typedef struct tagTreeItem
 {
   char* pWord; //tablica dynamiczna dla slow
