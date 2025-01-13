@@ -1,4 +1,5 @@
 Linked List in C
+
 This project demonstrates a dynamically managed linked list in C. It supports common operations like insertion, deletion, sorting, and searching elements.
 
 Features:
