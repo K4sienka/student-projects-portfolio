@@ -1,4 +1,5 @@
 BST Tree in C
+
 This project implements a simple Binary Search Tree (BST) in C. It reads words from a file, counts their occurrences, and records the lines they appear on. The results can be printed or saved to a file.
 
 Features:
