@@ -1,0 +1,320 @@
+---
+title: "KW_7"
+author: "Wesolowska_Katarzyna"
+date: "2024-05-27"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+#Zadanie 1
+dane <- read.csv2("C:/Users/wesol/OneDrive/Pulpit/Studia/Semestr IV/Modelowanie/weather.csv")
+head(dane)
+```
+
+```{r}
+#Zadanie 2
+str(dane) #typ zmiennych
+summary(dane) #podsumowanie statystyczne
+```
+
+```{r}
+#Zadanie 3
+colnames(dane)
+#Nieprzydatne będą identyfikatory oraz okres badan
+dane1 <- subset(dane, select = -c(id, DWD_ID, STATION.NAME, FEDERAL.STATE, PERIOD, RECORD.LENGTH))
+```
+
+```{r}
+#Zadanie 4
+dane1[dane1 == ""] <- NA #w miejsce braku danych wstawiamy NA
+rows <- nrow(dane1)
+dane2 <- na.omit(dane1) #usuniecie wierszy z NA
+sub_rows <- nrow(dane2)
+del_rows <- rows-sub_rows #obliczenie usunietych wierszy
+cat("Ilość usuniętych wierszy to:",del_rows)
+```
+
+```{r}
+#Zadanie 5
+wymiar<-dim(dane2) #wymiar zestawu danych
+cat("Wymiar obecnego zestawu zdanych wynosi",wymiar[1],"na",wymiar[2])
+```
+
+```{r}
+#Zadanie 6
+library(caTools)
+set.seed(88)  #losowe ziarno zeby przy kazdym zaladowaniu dawalo ten sam wynik
+podzial<-sample.split(dane2, SplitRatio = 0.7) #70% to zbior treningowy, podzial wtedy jest TRUE
+
+treningowy<-subset(dane2,podzial==TRUE)
+testowy<-subset(dane2,podzial==FALSE)
+```
+
+```{r}
+#Zadanie 7
+trening_y<-treningowy$MEAN.ANNUAL.RAINFALL #wyodrebnienie dla zbioru uczacego, zmienna objaśniana
+test_y<-testowy$MEAN.ANNUAL.RAINFALL
+
+trening_x<-as.matrix(subset(treningowy, select = -c(MEAN.ANNUAL.RAINFALL))) #zmienne objaśniające dla obydwu jako macierz
+test_x<-as.matrix(subset(testowy, select = -c(MEAN.ANNUAL.RAINFALL)))
+```
+
+```{r}
+#Zadanie 8
+library(ggplot2)
+library(GGally)
+#ggpairs(trening_x)
+```
+
+```{r}
+#Zadanie 9
+korelacja<- cor(dane2) #korelacja miedzy parami zmiennych
+#View(korelacja)
+```
+
+```{r}
+#Zadanie 10
+library(corrplot)
+corrplot(korelacja, method = "number") #wizualizacja korelacji
+```
+
+```{r}
+#Zadanie 11
+r<-abs(korelacja['MEAN.ANNUAL.RAINFALL', ]) >= 0.5  #wspolczynnik korelacji |r| >= 0.5 z mean.annual.rainfall
+r1<-names(r[r]) #nazwy zmiennych spelniajacych ten warunek
+dane3 <- dane2[, r1] #przefiltrowane dane
+```
+
+```{r}
+#Zadanie 12
+#ggpairs(dane3)
+```
+
+```{r}
+#########################
+#Część 2
+
+#Zadanie 1
+#model bazowy
+srednie_opady<-mean(trening_y)
+#rzeczywiste wartosci
+real_opady<- mean(test_y)
+cat("Średnia wartość opadów w danych treningowych:", srednie_opady, "\n")
+cat("Średnia wartość opadów w danych testowych:", real_opady, "\n")
+```
+
+```{r}
+#Zadanie 2
+#przewidywania
+predict_bazowe <- rep(srednie_opady, length(trening_y))
+#rmse
+rmse_bazowe <- sqrt(mean((trening_y- predict_bazowe)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu bazowego na zbiorze treningowym:", rmse_bazowe, "\n")
+
+```
+```{r}
+# Zadanie 3
+predicted_test <- rep(srednie_opady, length(test_y))
+
+# RMSE dla zbioru testowego
+rmse_bazowy_test<- sqrt(mean((test_y - predicted_test)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu bazowego na zbiorze testowym:", rmse_bazowy_test, "\n")
+
+
+```
+
+```{r}
+#Zadanie 4
+#zmienna objaśniającej z korelacją najbliższą 0.76
+zm<- abs(korelacja['MEAN.ANNUAL.RAINFALL', ])
+zm1<- names(which.min(abs(zm - 0.76)))
+cat("Zmienna objaśniająca z korelacją najbliższą 0.76 to:", zm1,"\n")
+
+#model dla zmiennej
+lm_model <- lm(MEAN.ANNUAL.RAINFALL ~ ALTITUDE, data = treningowy)
+#przewidywania
+predicted<- predict(lm_model, treningowy)
+
+# Obliczenie RMSE dla modelu regresji liniowej na zbiorze treningowym
+rmse_lm<- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predicted)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej na zbiorze treningowym:", rmse_lm)
+
+```
+```{r}
+#Zadanie 5
+# Prognozy dla modelu regresji liniowej na zbiorze testowym
+predict_test<- predict(lm_model, testowy)
+
+#rmse
+rmse_test <- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_test)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej na zbiorze testowym:", rmse_test)
+
+
+```
+
+```{r}
+#Zadanie 6
+#max opadow to zmienna objasniajaca
+lm_max<- lm(MEAN.ANNUAL.RAINFALL ~ MAX.RAINFALL, data = treningowy)
+#przewidywania
+predict_max<- predict(lm_max, treningowy)
+#rmse
+rmse_max<- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_max)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej z maksymalną ilością opadów na zbiorze treningowym:", rmse_max)
+
+```
+```{r}
+#Zadanie 7
+#dla predict
+max_predict<- predict(lm_max, testowy)
+
+#rmse
+rmse_max_predict <- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - max_predict)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej z maksymalną ilością opadów na zbiorze testowym:", rmse_max_predict)
+
+```
+
+```{r}
+#Zadanie 8
+#model regresji liniowej wielokrotnej
+modele<- lm(MEAN.ANNUAL.RAINFALL ~ ALTITUDE + MEAN.ANNUAL.AIR.TEMP + MAX.RAINFALL, data = treningowy)
+
+#predict
+predict_modele <- predict(modele, treningowy)
+
+#rmse
+rmse_modele <- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_modele)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej wielokrotnej na zbiorze treningowym:", rmse_modele)
+
+#r^2
+r2<- summary(modele)$r.squared
+cat("Współczynnik R^2 dla modelu regresji liniowej wielokrotnej:", r2)
+#Wspolczynnik jest wysoki (okolo 75%) zatem mozna stwierdzić, że model dobrze wyjasnia zmiennosc sredniej ilosci opadów.
+
+```
+
+```{r}
+#Zadanie 9
+#predict
+predict_modele_test <- predict(modele, testowy)
+#rmse
+rmse_modele_test<- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_modele_test)^2))
+cat("Błąd średniokwadratowy (RMSE) dla modelu regresji liniowej wielokrotnej na zbiorze testowym:", rmse_modele_test)
+
+```
+
+```{r}
+#Zadanie 10
+# Nazwy modeli
+models <- c("Model Bazowy", "Max Rainfall", "Multiple Regression", "Regression ALTITUDE")
+
+# RMSE dla zbioru treningowego
+rmse_train <- c(rmse_bazowe, rmse_max, rmse_modele, rmse_lm)
+
+# RMSE dla zbioru testowego
+rmse_test <- c(rmse_bazowy_test, rmse_max_predict, rmse_modele_test, rmse_test)
+
+# Utworzenie ramki danych do wykresu
+rmse_data <- data.frame(
+  Model = rep(models, each = 2),
+  RMSE = c(rmse_train, rmse_test),
+  Set = rep(c("Train", "Test"), times = length(models))
+)
+
+# Wykres słupkowy
+library(ggplot2)
+ggplot(rmse_data, aes(x = Model, y = RMSE, fill = Set)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Wartości RMSE dla różnych modeli", x = "Model", y = "RMSE") +
+  theme_minimal()
+
+```
+
+```{r}
+##Część 3
+# Zadanie 1
+lm_wzrost <- lm(MEAN.ANNUAL.RAINFALL ~ ALTITUDE + I(log(ALTITUDE)) + I(ALTITUDE^2), data = treningowy)
+predict_wzrost <- predict(lm_wzrost, treningowy)
+#RMSE
+rmse_wzrost <- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_wzrost)^2))
+cat("RMSE dla modelu z wysokością na zbiorze treningowym:", rmse_wzrost)
+```
+
+```{r}
+# Zadanie 2
+predict_wzrost_test<- predict(lm_wzrost, testowy)
+rmse_wzrost_test <- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_wzrost_test)^2))
+cat("RMSE dla modelu z wysokością na zbiorze testowym:", rmse_wzrost_test)
+```
+
+```{r}
+#Zadanie 3
+lm_max<- lm(MEAN.ANNUAL.RAINFALL ~ MAX.RAINFALL + I(log(MAX.RAINFALL)) + I(MAX.RAINFALL^2), data = treningowy)
+predict_max<- predict(lm_max, treningowy)
+rmse_max<- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_max)^2))
+cat("RMSE dla modelu z max ilością opadów na zbiorze treningowym:", rmse_max)
+```
+
+```{r}
+# Zadanie 4
+predict_max_test<- predict(lm_max, testowy)
+rmse_max_test <- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_max_test)^2))
+cat("RMSE dla modelu z max ilością opadów na zbiorze testowym:", rmse_max_test)
+```
+
+```{r}
+#Zadanie 5
+#forward
+model<- lm(MEAN.ANNUAL.RAINFALL ~ 1, data = treningowy) #bez zmiennej objasniajacej
+zmienne<- as.formula("MEAN.ANNUAL.RAINFALL ~ ALTITUDE + MAX.RAINFALL + MEAN.CLOUD.COVER + MEAN.ANNUAL.AIR.TEMP")
+forward<- step(model, scope = zmienne, direction = "forward")
+summary(forward)
+```
+
+```{r}
+# Zadanie 6
+zmienne2 <- c("MAX.RAINFALL", "MEAN.ANNUAL.AIR.TEMP", "MEAN.CLOUD.COVER")
+#formula dla modelu
+formula_zmienne <- as.formula(paste("MEAN.ANNUAL.RAINFALL ~", paste(zmienne2, collapse = " + ")))
+#teraz model
+model_zmienne <- lm(formula_zmienne, data = treningowy)
+predict_zmienne<- predict(model_zmienne, treningowy)
+rmse_zmienne<- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_zmienne)^2))
+cat("RMSE dla modelu z wybranymi zmiennymi na zbiorze treningowym:", rmse_zmienne)
+```
+
+```{r}
+#zadanie 7
+predict_zmienne_test<- predict(model_zmienne, testowy)
+rmse_zmienne_test<- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_zmienne_test)^2))
+cat("RMSE dla modelu z wybranymi zmiennymi na zbiorze testowym:", rmse_zmienne_test)
+```
+
+```{r}
+# Zadanie 8
+#backward
+model2 <- lm(MEAN.ANNUAL.RAINFALL ~ ALTITUDE + MAX.RAINFALL + MEAN.CLOUD.COVER + MEAN.ANNUAL.AIR.TEMP, data = treningowy)
+backward <- step(model2, direction = "backward")
+summary(backward)
+```
+
+```{r}
+#Zadanie 9
+zmienne3 <- c("MAX.RAINFALL", "MEAN.ANNUAL.AIR.TEMP", "MEAN.CLOUD.COVER")
+#formula dla modelu
+formula_zmienne2 <- as.formula(paste("MEAN.ANNUAL.RAINFALL ~", paste(zmienne3, collapse = " + ")))
+#teraz model
+model_zmienne2 <- lm(formula_zmienne2, data = treningowy)
+predict_zmienne2 <- predict(model_zmienne2, treningowy)
+rmse_zmienne2<- sqrt(mean((treningowy$MEAN.ANNUAL.RAINFALL - predict_zmienne2)^2))
+cat("RMSE dla modelu z backward selection na zbiorze treningowym:", rmse_zmienne2)
+```
+
+```{r}
+#Zadanie 10
+predict_zmienne2_test <- predict(model_zmienne2, testowy)
+rmse_zmienne2_test <- sqrt(mean((testowy$MEAN.ANNUAL.RAINFALL - predict_zmienne2_test)^2))
+cat("RMSE dla modelu z backward selection na zbiorze testowym:", rmse_zmienne2_test)
+```
