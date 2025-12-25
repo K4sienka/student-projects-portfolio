@@ -1,1 +1,4 @@
+## **Machine Learning Projects**
 
+This folder contains a collection of machine learning projects and practical assignments completed as part of university coursework. The projects cover key machine learning concepts, including supervised and unsupervised learning, classification, regression, clustering, exploratory data analysis (EDA), and feature engineering.
+The repository includes both analytical notebooks and a team-based application project involving an external AI API, where user data is processed and used to generate personalized outputs. The work focuses on the full data science workflow: data preparation, experimentation with different approaches, result evaluation, and analytical interpretation.
