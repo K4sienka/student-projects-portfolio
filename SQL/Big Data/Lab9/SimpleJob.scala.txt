@@ -1,0 +1,40 @@
+package agh.wggios.analizadanych
+
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions._
+
+object SimpleJob {
+
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Simple Spark Job")
+      .master("local[*]")
+      .getOrCreate()
+
+    val inputPath = "src/main/resources/example.csv"
+    val outputPath = "output/result"
+
+    val df = readData(spark, inputPath)
+    val transformed = transformData(df)
+    writeData(transformed, outputPath)
+
+    spark.stop()
+  }
+
+  def readData(spark: SparkSession, path: String): DataFrame = {
+    spark.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv(path)
+  }
+
+  def transformData(df: DataFrame): DataFrame = {
+    df.filter(col("some_column").isNotNull)
+  }
+
+  def writeData(df: DataFrame, path: String): Unit = {
+    df.write
+      .mode("overwrite")
+      .parquet(path)
+  }
+}
