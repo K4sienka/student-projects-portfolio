@@ -1,0 +1,170 @@
+---
+title: "Peer Review Three"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+<!-- Link do aplikacji: https://katarzyna-wesolowska.shinyapps.io/Wesolowska_Projekt_Dashboard/#section-page-3 -->
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(shiny)
+
+dat <- read_csv(url("https://www.dropbox.com/s/4ebgnkdhhxo5rac/cel_volden_wiseman%20_coursera.csv?raw=1"))
+
+dat <- dat %>%
+  mutate(
+    Party = recode(dem, `1` = "Democrat", `0` = "Republican"),
+    Party = factor(Party, levels = c("Democrat", "Republican"))
+  )
+
+party_cols <- c("Democrat" = "blue", "Republican" = "red")
+```
+
+Page 1
+======
+
+### Chart A
+
+```{r}
+dat %>% 
+  drop_na(year, Party, all_pass) %>% 
+  filter(year > 1979) %>% 
+  group_by(year, Party) %>% 
+  summarise(passed = sum(all_pass, na.rm = TRUE), .groups = "drop") %>% 
+  ggplot(aes(x = year, y = passed, fill = Party)) +
+  geom_area(position = "stack") +
+  scale_fill_manual(values = party_cols, breaks = c("Democrat", "Republican")) +
+  labs(
+    title = "Number of Bills Passed Since 1980",
+    x = "Year",
+    y = "All Bills Passed",
+    fill = "Party"
+  )
+```
+
+Page 2
+======
+
+Column {data-width=500}
+-------------------------------------
+
+### Chart B
+
+```{r}
+p_b <- dat %>%
+  drop_na(congress, votepct, all_pass, Party, thomas_name) %>%
+  filter(congress == 110) %>%
+  ggplot(aes(x = votepct, y = all_pass, color = Party, fill = Party)) +
+  geom_point(
+    aes(
+      text = paste0(
+        "votepct: ", votepct,
+        "<br>all_pass: ", all_pass,
+        "<br>thomas_name: ", thomas_name,
+        "<br>Party: ", Party
+      )
+    ),
+    size = 1.6
+  ) +
+  geom_smooth(
+    method = "loess",
+    formula = y ~ x,
+    se = TRUE,
+    linewidth = 1
+  ) +
+  scale_color_manual(values = party_cols) +
+  scale_fill_manual(values = party_cols) +
+  labs(
+    title = "Passage and Vote Pct., 110th Congress",
+    x = "Vote Pct.",
+    y = "All Pass",
+    color = "Party",
+    fill = "Party"
+  )
+
+ggplotly(p_b, tooltip = "text")
+```
+
+Column {data-width=500}
+-------------------------------------
+
+### Chart C
+
+```{r}
+p_c <- dat %>%
+  drop_na(congress, dwnom1, all_pass, Party, thomas_name) %>%
+  filter(congress == 110) %>%
+  ggplot(aes(x = dwnom1, y = all_pass, color = Party)) +
+  geom_point(
+    aes(
+      text = paste0(
+        "DW Nominate: ", dwnom1,
+        "<br>all_pass: ", all_pass,
+        "<br>thomas_name: ", thomas_name,
+        "<br>Party: ", Party
+      )
+    )
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = TRUE,
+    linewidth = 1
+  ) +
+  scale_color_manual(values = party_cols) +
+  labs(
+    title = "Passage and Ideology, 110th Congress",
+    x = "DW Nominate",
+    y = "All Pass",
+    color = "Party"
+  )
+
+ggplotly(p_c, tooltip = "text")
+```
+
+Page 3
+======
+
+Sidebar {.sidebar}
+-------------------------------------
+
+```{r}
+selectizeInput(
+  inputId = "states",
+  label = "State",
+  choices = sort(unique(dat$st_name)),
+  selected = sort(unique(dat$st_name)),
+  multiple = TRUE,
+  options = list(plugins = list("remove_button"))
+)
+```
+
+Column
+-------------------------------------
+
+### Chart D
+
+```{r}
+renderPlot({
+  req(input$states)
+  
+  dat %>% 
+    filter(congress == 110, st_name %in% input$states) %>%
+    group_by(st_name) %>%
+    summarise(passed = sum(all_pass, na.rm = TRUE), .groups = "drop") %>%
+    ggplot(aes(x = st_name, y = passed)) +
+    geom_col(fill = "gray35") +
+    coord_flip() +
+    labs(
+      title = "Total Bills Passed by State Delegations, 110th Congress",
+      x = "State Name",
+      y = "Total Bills Passed Per State"
+    )
+}, height = 750)
+```

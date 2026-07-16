@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+
+body {
+  background-color: #0e2a40;
+  color: #f0f0f0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.well {
+  background-color: #1b3b57;
+  border-radius: 10px;
+  padding: 15px;
+  color: #ffffff;
+}
+
+.leaflet-container {
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+.title-custom {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 400;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* styl boxa z suwakiem */
+.sidebar {
+  margin-left: 40px;
+  background-color: #f7f9fa;
+  padding: 30px;
+  border-radius: 16px;
+  width: 500px;
+  box-shadow: none;
+  border: none;
+  margin-top: 50px;
+  
+}
+
+/* Select Year */
+.sidebar h4 {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #1c1c1c;
+}
+
+/* Dynamiczna liczba pod Select Year */
+.year-text {
+  font-size: 28px;
+  font-weight: 500;
+  color: #0e2a40;
+  margin-bottom: 20px;
+}
+
+/* slider wygląd */
+.js-irs-0 .irs-bar {
+  background: #bcd8e6;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.js-irs-0 .irs-line {
+  background: #e5e8ec;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.js-irs-0 .irs-handle {
+  background: #0e2a40;
+  border: 3px solid white;
+  width: 24px;
+  height: 24px;
+  top: 17px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+}
+
+/* usuń dymek z wartością */
+.js-irs-0 .irs-single, .js-irs-0 .irs-min,
+.js-irs-0 .irs-max {
+  display: none !important;
+}
+
+/* Usunięcie całkowicie ramki z sidebarPanel */
+.sidebar {
+  background-color: #f7f9fa;
+  padding: 30px;
+  border-radius: 16px;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Usunięcie kontenera .well (to źródło ramki w Shiny) */
+.well {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.js-irs-0 .irs-grid-text {
+  font-size: 12px;
+  fill: #0e2a40;
+  color: #0e2a40;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.js-irs-0 .irs-grid-pol {
+  background-color: #ccc;
+  height: 8px;
+}
+
+.summary-box {
+  width: 500px;
+  margin-left: 40px;
+  background-color: #f7f9fa;
+  padding: 25px 30px;
+  border-radius: 16px;
+  margin-top: 30px; /* <-- odstęp od ramki nad suwakiem */
+  color: #1c1c1c;
+  box-shadow: none;
+}
+
+.stats-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #1c1c1c;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  
+}
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 auto;
+}
+
