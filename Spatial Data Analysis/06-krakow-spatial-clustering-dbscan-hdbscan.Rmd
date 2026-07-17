@@ -1,0 +1,177 @@
+---
+title: "Wesolowska_Katarzyna_13_projekt1"
+author: "Wesolowska_Katarzyna"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+```{r}
+library(sf)
+library(dbscan)
+library(ggplot2)
+
+data <- st_read("C:/Users/wesol/OneDrive/Pulpit/Studia/Semestr V/ADP/punkty/zestaw13_XYTableToPo_Project.shp")
+hood <- st_read("C:/Users/wesol/OneDrive/Pulpit/Studia/Semestr V/ADP/Klasteryzacja/osiedla.shp")
+coords <- st_coordinates(data)
+#head(coords) 
+```
+
+
+```{r}
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2]),
+             color = "blue", alpha = 0.5) +
+  labs(title = "Mapa dzielnic Krakowa") +
+  theme_void()
+```
+
+***
+
+## 1. DBSCAN 
+
+Algorytm identyfikuje klastry na podstawie gęstości punktów, łącząc punkty w obrębie określonego promienia Epsilon i uwzględniając minimalną liczbę punktów minPts. 
+Do jego zalet należy: brak wymogu określenia liczby klastrów z góry; wykrywa klastry o dowolnym kształcie; radzi sobie z szumem i wartościami odstającymi; wymaga tylko dwóch dosyć intuicyjnych parametrów do dostosowania.
+Jego wady natomiast to: wrażliwość na wybór miary odległości i parametrów eps i minPTs; nie radzi sobie z danymi o dużych różnicach w gęstości klastrów; nie jest całkowicie deterministyczny dla punktów granicznych, gdy kolejność przetwarzania ma znaczenie.
+Algorytm działa najlepiej dla danych z jednolitą gęstością i dobrze zdefiniowaną miarą odległości.
+
+***
+
+### minPts=50
+
+```{r}
+db1 <- dbscan(coords, eps = 250, minPts = 50)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db1$cluster)),
+             alpha = 0.7,size = 0.7) +
+  labs(title = "Dbscan dla eps=250, minPts=50", color = "Klaster") +
+  theme_void()
+```
+
+Dla dużej liczby minPts (50) oraz stosunkowo małego promienia eps (250) obserwujemy prezycyjne klastry w centrum miasta: w dzielnicach Stare Miasto czy Grzegórzki.
+Jednak występuje dużo "szumu" (punkty nie przypisane do żadnego klastra), co sugeruje, że promień jest zbyt mały, aby uwzględnić rzadsze skupiska.
+
+
+```{r}
+db2 <- dbscan(coords, eps = 500, minPts = 50)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db2$cluster)),
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Dbscan dla eps=500, minPts=50", color = "Klaster") +
+  theme_void()
+```
+
+Dla zwiększonego promienia (500) utworzył się jeden większy klaster w obszarze Starego Miasta, Grzegórzek oraz części Krowodrzy i Podgórza.
+Ilość punktów "szumu" zmalała, zatem więcej punktów zostało włączonych do klastrów.
+
+
+```{r}
+db3 <- dbscan(coords, eps = 1000, minPts = 50)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db3$cluster)),
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Dbscan dla eps=1000, minPts=50", color = "Klaster") +
+  theme_void()
+```
+
+Przy bardzo dużym promieniu (1000) i tej samej liczbue punktów (50) wykryto więcej klastrów. Wysoki promień łączy większe obszary w klastry podkreślając zwiększoną gęstość punktów, ale jednocześnie może skutkować to mniej precyzyjnymi wynikami.
+
+***
+
+### eps=500
+
+```{r}
+db4 <- dbscan(coords, eps = 500, minPts = 5)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db4$cluster)),
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Dbscan dla eps=500, minPts=5", color = "Klaster") +
+  theme_void()
+```
+
+Przy stosunkowo dużym promieniu i małej liczbie punktów powstało, aż 16 (małych) klastrów. Przez niski próg minPts wykrywane są mniejsze i mniej istotne skupiska, co powoduje również małą ilość punktów "szumu". Wiele małych klastrów znajduje się w centrum (Stare Miasto, Grzegórzki),a także na obrzeżach Nowej Huty, Podgórza i Krowodrzy.
+
+```{r}
+db5 <- dbscan(coords, eps = 500, minPts = 25)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db5$cluster)),
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Dbscan dla eps=500, minPts=25", color = "Klaster") +
+  theme_void()
+```
+
+Dla zwiększonej wartości punktów (25) zidentyfikowano klastry, które są bardziej rozległe i skoncentrowane w gęstszych obszarach. Punktów "szumu" pojawiło się trochę więcej. Głównie widoczne klastry to Stare Miasto i Grzegórzki, Nowa Huta oraz Podgórze.
+
+```{r}
+db6 <- dbscan(coords, eps = 500, minPts = 100)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(db6$cluster)),
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Dbscan dla eps=500, minPts=100", color = "Klaster") +
+  theme_void()
+```
+
+Dla jeszcze większej wartości minPts (100) wykryto tylko jeden duży klaster dla centrum oraz wiele punktów "szumu". Te parametry wymagają bardzo dużej gestości punktów w dużym promieniu, przez co mniejsze skupiska są pomijane.
+
+***
+
+## 2. HDBSCAN
+
+Jest rozwinięciem algorytmu dbscan. Automatycznie dopasowuje się do miejsc o różnej gęstości punktów, co pozwala lepiej wykrywać zarówno gęste, jak i rzadsze klastry. Punkty, które nie pasują do żadnego klastra, są traktowane jako "szum". 
+Jego zalety to: radzenie sobie z klastrami o różnej gęstości, brak potrzeby znajomości parametru epsilon; automatyczne usuwanie szumu oraz ukazywanie hierarchii klastrów. 
+Do jego wad zalicza się: bardziej skomplikowane działanie niż dbscan; wolniejsze działanie przy dużych zbiorach; duże znaczenie odpowiedniego doboru parametru minPts, od którego algorytm jest zależny.
+Hdbscan sprawdza się lepiej dla zróżnicowanych danych pod względem gęstości lub gdy trudno ustalić jeden stały promień dla klastrów.
+
+***
+
+```{r}
+hdb1 <- hdbscan(coords, minPts = 10)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(hdb1$cluster)), 
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Hdbscan dla minPts=10", color = "Klaster") +
+  theme_void()
+```
+
+Dla niskiej wartości minPts (10) wykryto dwa główne klastry: Stare Miasto/Grzegórzki oraz Podgórze i okolice. Klastry te obejmują dużą liczbę punktów, również w obszarach o rzadszym zagęszczeniu.
+
+
+```{r}
+hdb2 <- hdbscan(coords, minPts = 25)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(hdb2$cluster)), 
+             alpha = 0.7, size = 0.7) +
+  labs(title = "Hdbscan dla minPts=25", color = "Klaster") +
+  theme_void()
+```
+
+Po zwiększeniu minPts (25) wyodrębniono więcej klastrów, które uwzględniają zagęszczoną część miasta. Zwiększyła się ilość punktów dla "szumu" co wskazuje na bardziej precyzyjne wyobdrębnienie gęstych skupisk. Widoczne klastry to: Stare Miasto i Grzegórzki, Krowodrza, Nowa Huta oraz Podgórze i okolice.
+
+```{r}
+hdb3 <- hdbscan(coords, minPts = 100)
+ggplot() +
+  geom_sf(data = hood, fill = NA, color = "black") +
+  geom_point(aes(x = coords[, 1], y = coords[, 2], color = as.factor(hdb3$cluster)), 
+              alpha = 0.7, size = 0.7) +
+  labs(title = "Hdbscan dla minPts=100", color = "Klaster") +
+  theme_void()
+```
+
+Dla dużej wartości minPts (100) wykryto klastry, które obejmują tylko najgęstsze obszary: Centrum miasta oraz Nową Hute. Większość punktów z obrzeży miasta oznaczono jako "szum".
+
+***
+
+#### Podsumowujac użycie dbscan i hdbscan:
+
+W naszych danych widać różnice w gęstości – centrum miasta ma więcej zdarzeń niż obrzeża. Jeśli skupiamy się na gęstych obszarach w centrum, dbscan będzie się bardzo dobrze sprawdzał. 
+Jeśli jednak chcemy uwzględnić także rzadsze punkty na obrzeżach, hdbscan będzie lepszym wyborem dzięki dostosowaniu się do różnej gęstości klastrów.
+

@@ -1,0 +1,52 @@
+---
+title: "Lab1"
+author: "Wesolowska_Katarzyna"
+date: "2024-10-07"
+output: html_document
+---
+
+```{r}
+library(spatstat)
+library(ggplot2)
+set.seed(123)
+
+#Zad1
+x = runif(100,0,1)
+y = runif(100,0,2)
+```
+
+``` {r}
+#Zad2
+plot(x,y,asp=1,pch=16, col='blue', main="Rectangle")
+rect(0,0,1,2, border="lightblue",lwd=3)
+```
+
+```{r}
+#Zad3
+r_squared = runif(300,0,100)
+angle = runif(300,0,2*pi)
+x1 = sqrt(r_squared)*cos(angle)
+y1 = sqrt(r_squared)*sin(angle)
+```
+
+```{r}
+#Zad4
+plot(disc(10), main="Square")
+points(x1,y1,pch=16,col="#389999")
+```
+```{r}
+#Zad5
+pppp <- ppp(x1, y1, window=disc(10))
+test <- quadrat.test(pppp)
+test
+par(pin = c(4.5, 4.5)) 
+plot(test, main="Test", cex=0.8, col='red')
+#Wartość pvalue jest większa niż 0.05, zatem nie ma powodu do odrzucenia hipotezy
+```
+```{r}
+#zadanie6
+poisonn <- rpoispp(500/(100*pi),win=disc(10))
+poisonn
+plot(poisonn, main="CSR", pch=16, cols='pink')
+```
+
